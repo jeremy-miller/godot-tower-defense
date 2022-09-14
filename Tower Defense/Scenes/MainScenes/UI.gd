@@ -1,0 +1,67 @@
+extends CanvasLayer
+
+onready var hp_bar = get_node("HUD/InfoBar/HBox/HP")
+onready var hp_bar_tween = get_node("HUD/InfoBar/HBox/HP/Tween")
+
+func set_tower_preview(tower_type, mouse_position):
+	var drag_tower = load("res://Scenes/Turrets/" + tower_type + ".tscn").instance()
+	drag_tower.set_name("DragTower")
+	drag_tower.modulate = Color("ad54ff3c")
+	
+	var range_texture = Sprite.new()
+	range_texture.set_name("Range")
+	range_texture.position = Vector2(32, 32) # same offset as tower textures
+	var scaling = GameData.tower_data[tower_type]["range"] / 600.0
+	range_texture.scale = Vector2(scaling, scaling)
+	var texture = load("res://Assets/UI/range_overlay.png")
+	range_texture.texture = texture
+	range_texture.modulate = Color("ad54ff3c")
+
+	var control = Control.new()
+	control.add_child(drag_tower, true)
+	control.add_child(range_texture, true)
+	control.rect_position = mouse_position
+	control.set_name("TowerPreview")
+	add_child(control, true)
+	move_child(get_node("TowerPreview"), 0) # move preview behind UI buttons
+
+func update_tower_preview(new_position, color):
+	get_node("TowerPreview").rect_position = new_position
+	if get_node("TowerPreview/DragTower").modulate != Color(color):
+		get_node("TowerPreview/DragTower").modulate = Color(color)
+		get_node("TowerPreview/Range").modulate = Color(color)
+
+func update_health_bar(base_health):
+	hp_bar_tween.interpolate_property(hp_bar, "value", hp_bar.value, base_health, 0.1, Tween.TRANS_LINEAR, Tween.EASE_IN_OUT)
+	# tween will set "value" property at same time as doing the interpolation
+	hp_bar_tween.start()
+	if base_health >= 60:
+		hp_bar.tint_progress = "3cc510" # green
+	elif base_health < 60 and base_health >= 25:
+		hp_bar.tint_progress = "e1be32" # orange
+	else:
+		hp_bar.tint_progress = "e11e1e" # red
+
+################
+# Game Controls
+################
+
+func _on_PausePlay_pressed():
+	if get_parent().build_mode:
+		get_parent().cancel_build_mode()
+	if get_tree().is_paused():
+		get_tree().paused = false
+	elif get_parent().current_wave == 0: # beginning of game
+		get_parent().current_wave += 1
+		get_parent().start_next_wave()
+	else:
+		get_tree().paused = true
+
+
+func _on_SpeedUp_pressed():
+	if get_parent().build_mode:
+		get_parent().cancel_build_mode()
+	if Engine.get_time_scale() == 2.0:
+		Engine.set_time_scale(1.0)
+	else:
+		Engine.set_time_scale(2.0)

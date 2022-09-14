@@ -1,0 +1,7 @@
+Tanks: https://kenney.nl/assets/topdown-tanks-redux
+Turrets: https://kenney.nl/assets/tower-defense-top-down
+Game Icons: https://kenney.nl/assets/game-icons
+Fonts: https://kenney.nl/assets/kenney-fonts
+UI Elements:
+  - https://kenney.nl/assets/ui-pack
+  - https://kenney.nl/assets/ui-pack-space-expansion
